@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+SC&family=Open+Sans&family=Encode+Sans+Condensed&family=Nunito&family=Raleway&display=swap');
 
 *::selection{
-    background: black;
-    color:#e92e2b;
+    background: rgba(27, 138, 229, 0.661);
+    color:white;
 }
 
 /* Navbar */

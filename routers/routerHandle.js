@@ -12,6 +12,7 @@ app.get("/cookies",(req,res)=>{
 })
 app.use("/cart", require("./cart.js"))
 app.use("/products", require("./products.js"))
+app.use("/tag", require("./tag.js"))
 }
 
 module.exports = routerHandle;

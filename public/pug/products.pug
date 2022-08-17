@@ -12,11 +12,11 @@ html
             .row
                 .col-lg-7.col-12.mb-3
                     img.w-100#productImg(src="/img/1x1notfound.jpg")
-                .col.fontRaleway.px-3
+                .col.fontESC.px-3
                     #productName.text-center.py-3.mb-3
                         h2.mb-0.fw-bold=product.name.toUpperCase()
                     p.d-block.fs-3.fw-bold.text-center.text-black#price
-                        span.fontOP="- "+product.price.toLocaleString()+"vnđ -"
+                        span.fontOP=product.price.toLocaleString()+"vnđ"
                     p.ms-1.fs-4.mb-1 Màu
                     .row.px-3.mb-3#colors
                     p.ms-1.fs-4.mb-1 Size
