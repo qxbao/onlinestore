@@ -1,0 +1,145 @@
+doctype HTML5
+html
+    head
+        title "Tenjikiz" Store - Trang chủ
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        meta(name="author" content="devB")
+        meta(name="keywords" content="online store, store, tenjikiz, sell, buy, shop, online shop, online")
+        include general.pug
+        link(rel="stylesheet" href="/css/home.css")
+    body
+        include navbar.pug
+        .container.pb-5
+            marquee.fontNunito.py-2.mb-3.border.border-dark Chào hè tới, toàn bộ sản phẩm trên store sẽ tăng giá từ 50-100% để kiếm tiền cho chủ store đi du lịch. Mọi người vào mua ngay kẻo hết nào!!! 
+            .row.mb-5
+                .col-12.col-xl-9
+                    .carousel.slide#highlightCarousel(data-bs-ride="carousel")
+                        .carousel-indicators
+                            button.active(data-bs-target="#highlightCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1")
+                            button(data-bs-target="#highlightCarousel" data-bs-slide-to="1" aria-label="Slide 2")
+                            button(data-bs-target="#highlightCarousel" data-bs-slide-to="2" aria-label="Slide 3")
+                        .carousel-inner
+                            .carousel-item.active(data-bs-interval="5000")
+                                img.d-block.w-100(src="https://i.pinimg.com/originals/27/2b/28/272b282de70834c192b018a822b718cb.png")
+                            .carousel-item(data-bs-interval="5000")
+                                img.d-block.w-100(src="https://i.pinimg.com/originals/9c/7b/e4/9c7be43979a736a8695361a544630b97.jpg")
+                            .carousel-item(data-bs-interval="5000")
+                                img.d-block.w-100(src="https://wallpaperaccess.com/full/2029165.jpg")
+                        button.carousel-control-prev(data-bs-target="#highlightCarousel" data-bs-slide="prev")
+                            span.carousel-control-prev-icon(aria-hidden="true")
+                            span.visually-hidden Previous
+                        button.carousel-control-next(type="button" data-bs-target="#highlightCarousel" data-bs-slide="next")
+                            span.carousel-control-next-icon(aria-hidden="true")
+                            span.visually-hidden Next
+                .col.d-none.d-xl-block
+                    .card.h-25.rounded-0
+                        .row.g-0.h-100
+                            .col-md-5
+                                //- 1x1 image
+                                img.img-fluid.h-100(src="https://outofschool.club/wp-content/uploads/2015/02/insert-image-here.jpg")
+                            .col-md-7
+                                .card-body
+                                    h5.card-title Áo phông
+                                    small Mùa hè thì nóng, mùa đông thì mát 
+                    .card.h-25.rounded-0
+                        .row.g-0.h-100
+                            .col-md-5
+                                img.img-fluid.h-100(src="https://www.uniqueconcept.my/wp-content/uploads/2019/07/Button-Down-Short-Sleeve-Shirts-flat-Navy.png")
+                            .col-md-7
+                                .card-body
+                                    h5.card-title Áo sơ-mi
+                                    small Dễ dây bẩn, dây vô rùi rửa đố mà trôi
+                    .card.h-25.rounded-0
+                        .row.g-0.h-100
+                            .col-md-5
+                                img.img-fluid.h-100(src="https://outofschool.club/wp-content/uploads/2015/02/insert-image-here.jpg")
+                            .col-md-7
+                                .card-body
+                                    h5.card-title Quần short
+                                    small Gọi là quần short chứ nó dài lắm, mặc nóng
+                    .card.h-25.rounded-0
+                        .row.g-0.h-100
+                            .col-md-5
+                                img.img-fluid.h-100(src="https://outofschool.club/wp-content/uploads/2015/02/insert-image-here.jpg")
+                            .col-md-7
+                                .card-body
+                                    div
+                                        h5.card-title Tất/vớ
+                                        small Mỏng, mát nhưng mang 2 lần là thủng
+            .row.d-flex.justify-content-center.mb-4
+                .col-12.col-lg-8.p-4.text-center.text-white(style="background: linear-gradient(to right, #3c3b3f, #605c3c);")
+                    h3.mb-0.fontNunito DANH MỤC
+            .row.mb-4
+                .col-6.mb-3.col-lg-2
+                    a.card.border-dark.rounded-0(href="#")
+                        //- 1x1 image
+                        img(src="https://image.uniqlo.com/UQ/ST3/us/imagesgoods/457125/item/usgoods_09_457125.jpg?width=750", alt="")
+                        .card-img-overlay.d-flex.justify-content-center.align-items-center.p-0
+                             h5.fontRaleway.fw-bold.card-title.text-center.bg-black.text-white.p-2.w-100.bg-opacity-75 Áo phông
+                .col-6.mb-3.col-lg-2
+                    a.card.border-dark.rounded-0(href="#")
+                        //- 1x1 image
+                        img(src="https://image.uniqlo.com/UQ/ST3/us/imagesgoods/452548/sub/usgoods_452548_sub7.jpg?width=750", alt="")
+                        .card-img-overlay.d-flex.justify-content-center.align-items-center.p-0
+                             h5.fontRaleway.fw-bold.card-title.text-center.bg-black.text-white.p-2.w-100.bg-opacity-75 Sơ mi
+                .col-lg-2.col-6.mb-3
+                    a.card.border-dark.rounded-0(href="#")
+                        //- 1x1 image
+                        img(src="https://image.uniqlo.com/UQ/ST3/us/imagesgoods/447656/item/usgoods_67_447656.jpg?width=750", alt="")
+                        .card-img-overlay.d-flex.justify-content-center.align-items-center.p-0
+                            h5.fontRaleway.fw-bold.card-title.text-center.bg-black.text-white.p-2.w-100.bg-opacity-75 Quần jean
+                .col-lg-2.col-6.mb-3
+                    a.card.border-dark.rounded-0(href="#")
+                        //- 1x1 image
+                        img(src="https://image.uniqlo.com/UQ/ST3/us/imagesgoods/448490/item/usgoods_06_448490.jpg?width=750", alt="")
+                        .card-img-overlay.d-flex.justify-content-center.align-items-center.p-0
+                             h5.fontRaleway.fw-bold.card-title.text-center.bg-black.text-white.p-2.w-100.bg-opacity-75 Quần short
+                .col-lg-2.col-6.mb-3
+                    a.card.border-dark.rounded-0(href="#")
+                        //- 1x1 image
+                        img(src="https://image.uniqlo.com/UQ/ST3/us/imagesgoods/452548/sub/usgoods_452548_sub8.jpg?width=750", alt="")
+                        .card-img-overlay.d-flex.justify-content-center.align-items-center.p-0
+                            h5.fontRaleway.fw-bold.card-title.text-center.bg-black.text-white.p-2.w-100.bg-opacity-75 Jogger
+                .col-lg-2.col-6.mb-3
+                    a.card.border-dark.rounded-0(href="#")
+                        //- 1x1 image
+                        img(src="https://image.uniqlo.com/UQ/ST3/WesternCommon/imagesgoods/447959/item/goods_03_447959.jpg?width=750", alt="")
+                        .card-img-overlay.d-flex.justify-content-center.align-items-center.p-0
+                            h5.fontRaleway.fw-bold.card-title.text-center.bg-black.text-white.p-2.w-100.bg-opacity-75 Phụ kiện
+            .row.d-flex.justify-content-center.mb-5#aboutUs
+                .col-12.col-lg-8.p-4.text-center.text-white(style="background:black")
+                    h3.mb-0.fontNunito VỀ CHÚNG TÔI
+            .row.mb-5
+                .desc.col-lg-4.col-12.mb-3
+                    .px-4.py-5.h-100
+                        h3.text-center.mb-3.fontRaleway CHẤT LƯỢNG
+                        p.fontNunito Chúng tôi - một công ty chuyên xuất khẩu quần áo tới những thị trường lớn mạnh bậc nhất như Hoa Kỳ, Anh, 
+                            |  Úc,... luôn đặt chất lượng sản phẩm lên hàng đầu. Mọi sản phẩm được bán trên Tenjikiz đều được sản xuất
+                            |  thủ công với chất liệu có thể tái chế, thân thiện với môi trường đồng thời mang lại trải nghiệm tuyệt vời
+                            |  cho người sử dụng. 
+                .desc.col-lg-4.col-12.mb-3
+                    .px-4.py-5.h-100
+                        h3.text-center.mb-3.fontRaleway UY TÍN
+                        p.fontNunito Xuất hiện trên thị trường từ năm 2000, thương hiệu "Tenjikiz" đã khẳng định được vị thế của mình trên thị
+                            |  trường Việt Nam cũng như quốc tế sau vô số khó khăn, vất vả. Chúng tôi trân trọng, nâng niu và gìn giữ
+                            |  sự tin tưởng của khách hàng vì chính nhờ các bạn, Tenjikiz mới có được ngày hôm nay.
+                .desc.col-lg-4.col-12.mb-3
+                    .px-4.py-5.h-100
+                        h3.text-center.mb-3.fontRaleway GIẢI THƯỞNG
+                        p.fontNunito Bằng sự ủng hộ của khách hàng, chúng tôi đã thành công đoạt được những giải thưởng lớn như:
+                            b  Oscar
+                            |  (2017, 2019), 
+                            b  Bông sen vàng
+                            |  (2010),
+                            b  Vô địch Champions League
+                            |  (2021),
+                            b  Diễn viên ưu tú của năm
+                            |  (2015),
+                            b  Hoa hậu thế giới
+                            |  (2015),
+                            b  Store bị bom hàng nhiều nhất
+                            |  (2005-2021),
+                            b  Huy chương vàng Paralympic môn nhảy xa
+                            |  (2021),...
+        include footer.pug

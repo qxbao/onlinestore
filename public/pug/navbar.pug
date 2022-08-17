@@ -1,0 +1,55 @@
+.navbar.navbar-expand-lg.bg-white.p-4.navbar.navbar-white.sticky-top.mb-4#mainNav
+        .container-fluid
+            a.navbar-brand.d-flex.align-items-center(href="/")
+                img.d-inline-block.align-text-top(width="50" src="/img/logo.png")
+                span.h1.ms-2.fw-bold.fontCormorant.mb-0 Tenjikiz
+            button.navbar-toggler.collapsed.rounded-1(data-bs-toggle="collapse" data-bs-target="#myNav" aria-controls="myNav" aria-expanded="false" aria-label="Toggle navigation")
+                i.fa-solid.fa-bars.py-1
+            .navbar-collapse.collapse.row#myNav.px-2
+                ul.navbar-nav.mb-2.mb-lg-0.col-lg-8.pe-0
+                    li.nav-item
+                        a.nav-link(href="/")
+                            i.fa-solid.fa-house.me-1
+                            | Trang chủ
+                    li.nav-item
+                        a.nav-link(href="/clothes")
+                            .fa-solid.fa-shirt.me-1
+                            | Quần áo
+                    li.nav-item
+                        a.nav-link(href="/accessories")
+                            i.fa-solid.fa-socks.me-1
+                            | Phụ kiện
+                    li.nav-item.mt-3.mt-lg-0.ms-lg-3
+                        a.btn.btn-dark.rounded-0.position-relative.w-100(href="/cart")
+                            span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger#cartCount
+                            i.fa-solid.fa-cart-shopping.me-1
+                            |  Giỏ hàng
+                .w-100.d-lg-none
+                form.d-flex.col-lg-4.px-0.mb-0
+                    .input-group
+                        button.rounded-0.btn.btn-outline-success.dropdown-toggle.d-block.d-md-none.d-xl-block(data-bs-toggle="dropdown" aria-expanded="false") Toàn bộ
+                        ul.dropdown-menu.rounded-0
+                            li
+                                a.dropdown-item Toàn bộ
+                            li
+                                a.dropdown-item Áo
+                            li
+                                a.dropdown-item Quần
+                            li
+                                a.dropdown-item Đồ lót
+                            li
+                                a.dropdown-item Tất
+                        input.form-control.border-0#searchBar(type="text" placeholder="Nhập tên sản phẩm")
+                        button.rounded-0.btn.btn-outline-dark(type="submit")
+                            i.fa-solid.fa-magnifying-glass
+script.
+    $(document).ready(()=>{
+        $.get('/cookies',{'name':'cart'},(res)=>{
+            let cookie = JSON.parse(res);
+            let counter = 0;
+            for(let i=0;i<cookie.length;i++){
+                counter+=parseInt(cookie[i].quantity)
+            }
+            $("#cartCount").text(counter)
+        },'text')
+    })

@@ -1,0 +1,25 @@
+#chosenColor {
+    box-shadow: 0 0 0 3px white,
+        0 0 0 6px rgb(209, 54, 54);
+}
+
+.color {
+    cursor: pointer;
+    outline: 1px solid black;
+}
+.color:hover{
+    box-shadow: 0 0 0 3px white,
+        0 0 0 6px rgb(209, 54, 54, 0.5);
+    transition:0.2s all;
+}
+
+#price {
+    background: none;
+}
+
+#productName{
+    background:#171717;
+    color:white;
+    box-shadow: 0 4px white,
+                0 10px #171717;
+}

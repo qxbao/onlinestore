@@ -1,0 +1,134 @@
+doctype HTML5
+html
+    head
+        title=product.name
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        include general.pug
+        link(rel="stylesheet" href="/css/product.css")
+    body
+        include navbar.pug
+        .container.mb-5
+            .row
+                .col-lg-7.col-12.mb-3
+                    img.w-100#productImg(src="/img/1x1notfound.jpg")
+                .col.fontRaleway.px-3
+                    #productName.text-center.py-3.mb-3
+                        h2.mb-0.fw-bold=product.name.toUpperCase()
+                    p.d-block.fs-3.fw-bold.text-center.text-black#price
+                        span.fontOP="- "+product.price.toLocaleString()+"vnđ -"
+                    p.ms-1.fs-4.mb-1 Màu
+                    .row.px-3.mb-3#colors
+                    p.ms-1.fs-4.mb-1 Size
+                    select.form-select.rounded-0.fontOP#size
+                    p.text-end Còn 
+                        span#totalRemain
+                        |  sản phẩm
+                    p.ms-1.fs-4.mb-1 Số lượng
+                    input#quantity.mb-3.form-control.rounded-0.mb-5.fontOP(type="number" value="1" min="1" step="1")
+                    
+                    button.btn.btn-outline-dark.rounded-0.w-100.py-3#addBtn Thêm vào giỏ
+                    p.mt-4.text-center Tổng: 
+                        span.fs-2.fw-bold#total=product.price.toLocaleString()
+                        |  VNĐ
+                    p.mb-0
+                        b Lưu ý:
+                        |  Kiểm tra kỹ size trước khi đặt hàng. Store từ chối đổi/trả với lí do "mặc không vừa".
+            hr.my-4
+            p.h3 Giới thiệu sản phẩm
+            #productDesc
+        .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
+            .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
+                .toast-header
+                    strong.me-auto#toastTitle Thông báo
+                    small ngay bây giờ
+                    button(type="button" data-bs-dismiss="toast" aria-label="Close").btn-close
+                .toast-body.text-black#toastContent Nội dung mặc định
+        include footer.pug
+        script.
+            const changeSize = (sizes)=>{
+                $.each(sizes, (key2,val2)=>{
+                    if(val2==0){
+                        $("#size").append("<option disabled>"+key2.toUpperCase()+" (HẾT HÀNG)</option>")
+                    }else{
+                        $("#size").append("<option size='"+key2+"' remain='"+val2+"'>"+key2.toUpperCase()+" ("+val2+")</option>")
+                    }
+                })
+            }
+            const totalCount = ()=>{
+                $("#total").text((#{product.price}*$("#quantity").val()).toLocaleString())
+            }
+            const changeImage = ()=>{
+
+            }
+            $(document).ready(async function(){
+                const thongbao = new bootstrap.Toast($('#thongBao'))
+                let colors = [];
+                let size = [];
+                let snc = {};
+                let totalRemain = 0;
+                await $.get("/json/products/#{product.id}.json",{},(res)=>{
+                    snc = res["data"];
+                    for(let i = 0;i<Object.keys(snc).length;i++){
+                        colors.push(Object.keys(snc)[i])
+                        size.push(snc[colors[i]])
+                        $.each(snc[Object.keys(snc)[i]], (key,val)=>{
+                            totalRemain+=val
+                        })
+                    }
+                    $("#totalRemain").text(totalRemain)
+                    $.each(colors, (key,val)=>{
+                        let addedId="";
+                        if(key==0){
+                            addedId = "chosenColor";
+                            changeSize(size[key])
+                        }
+                        $("#colors").append("<div class='color col-1 me-3 border-2 p-0' id='"+addedId+"' value='"+val+"'><div class='ratio ratio-1x1' style='background-position: center center;background-repeat: no-repeat;background-size: cover;background-image:url(/img/color/"+val+".jpg')></div></div>")
+                    })
+                    $("#productDesc").html(res["desc"])
+                },"json")
+                $(".color").click(function(){
+                    $(".color").attr("id","");
+                    $(this).attr("id", "chosenColor")
+                    $("#productImg").attr("src","/img/#{product.id}/"+$("#chosenColor").attr("value")+".jpg")
+                    $("#size").html("")
+                    $("#quantity").val(1)
+                    totalCount()
+                    changeSize(snc[$(this).attr("value")])
+                })
+                $("#size").change(()=>{
+                    $("#quantity").val(1)
+                    totalCount();
+                })
+                $("#quantity").on("input", function(){
+                    let max = parseInt($("#size option:selected").attr("remain"))
+                    $("#quantity").attr("max",max)
+                    if(parseInt($(this).val())<0){
+                        $(this).val(0)
+                    }else if(parseInt($(this).val())>max){
+                        $(this).val(max)
+                    }else if($(this).val()==""){
+                        $(this).val(0)
+                    }
+                    totalCount()      
+                })
+                $("#productImg").attr("src","/img/#{product.id}/"+$("#chosenColor").attr("value")+".jpg")
+                $("#addBtn").click(()=>{
+                    let quantity = parseInt($("#quantity").val());
+                    let size = $("#size option:selected").attr("size");
+                    let color = $("#chosenColor").attr('value')
+                    $.post("/products/add",{"id":"#{product.id}", "quantity":quantity, "size":size, "color":color},(res)=>{
+                        if(res.status==0){
+                            $('#toastTitle').attr("class", "me-auto text-danger")
+                            $('#toastContent').text(res.msg)
+                        }else if(res.status==1){
+                            $('#toastTitle').attr("class", "me-auto text-success")
+                            $('#toastContent').text(res.msg)
+                        }else{
+                            $('#toastTitle').attr("class", "me-auto text-danger")
+                            $('#toastContent').text("Lỗi không xác định")
+                        }
+                        thongbao.show()
+                    },"json")
+                })
+            })

@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+SC&family=Open+Sans&family=Encode+Sans+Condensed&family=Nunito&family=Raleway&display=swap');
+
+*::selection{
+    background: black;
+    color:#e92e2b;
+}
+
+/* Navbar */
+#mainNav{
+    box-shadow: 0px 0.5px black; 
+}
+/* .btn, .btn-close{
+    outline: none !important;
+    box-shadow: none !important;
+} */
+#searchBar{
+    background:#F0F2F5;
+}
+/* Fonts */
+.fontNunito{
+    font-family: 'Nunito', sans-serif;
+}
+
+.fontRaleway{
+    font-family: 'Raleway', sans-serif;
+}
+
+.fontCormorant{
+    font-family: 'Cormorant SC', serif;
+}
+
+.fontESC{
+    font-family: 'Encode Sans Condensed', sans-serif;
+}
+
+.fontOP{
+    font-family: 'Open Sans', sans-serif;
+}
+
+footer{
+    background: #dcdcdc;
+    box-shadow: 0px 0px 10px grey inset ;
+}
