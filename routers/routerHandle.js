@@ -6,8 +6,10 @@ app.get("/", (req,res)=>{
 app.get("/cookies",(req,res)=>{
     if(req.cookies[req.query.name]){
         res.send(req.cookies[req.query.name])
+    }else if(req.signedCookies[req.query.name]){
+        res.send(req.signedCookies[req.query.name])
     }else{
-        res.send('[]')
+        res.sendStatus(404)
     }
 })
 app.use("/cart", require("./cart.js"))

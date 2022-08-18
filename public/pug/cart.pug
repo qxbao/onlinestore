@@ -1,7 +1,7 @@
 doctype HTML5
 html
     head
-        title Giỏ hàng - "Tenjikiz" Store
+        title Giỏ hàng
         meta(charset="UTF-8")
         meta(name="viewport" content="width=device-width, initial-scale=1.0")
         include general.pug
@@ -9,20 +9,15 @@ html
     body
         include navbar.pug
         .container
-            h2.fontOP.mb-4.fw-bold Giỏ hàng 
-            //- hr.mb-5
             .row
-                .col-12.col-lg-8.mb-3
+                .col-12.col-lg-8.mb-3.order-2.order-lg-0
                     .card.rounded-0.border-dark
                         .card-body.p-4.fontNunito
                             #cartList
-                            button.w-100.btn.btn-outline-success.rounded-0.fontOP#saveChangeButton
-                                i.fa-solid.fa-floppy-disk.me-2
-                                | LƯU THAY ĐỔI
-                .col-12.col-lg-4.mb-3
+                .col-12.col-lg-4.mb-3.order-1
                     .card.rounded-0.border-0.mb-4
                         .card-body.fontNunito.p-4(style="background:#f4f4f4")
-                            h2.fontRaleway.text-center Thông tin thanh toán
+                            h2.fontRaleway.text-center Thông tin đơn hàng
                             hr.bg-dark.mb-4
                             .d-flex
                                 p Số lượng sản phẩm
@@ -43,7 +38,7 @@ html
                             hr
                             small
                                 i Thuế VAT được tính bằng 8% tổng giá trị đơn hàng. Mọi ý kiến về thuế vui lòng liên hệ cơ quan có thẩm quyền.
-                    button.w-100.btn.btn-outline-dark.py-3.rounded-0 THANH TOÁN
+                    button.w-100.btn.btn-outline-dark.py-3.rounded-0#confirmButton(disabled) XÁC NHẬN ĐƠN
         .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
             .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
                 .toast-header
@@ -53,63 +48,101 @@ html
                 .toast-body.text-black#toastContent Nội dung mặc định
         script.
             $(document).ready(()=>{
-                const thongbao = new bootstrap.Toast($('#thongBao'))
                 let subtotal = 0;
                 let productCounter = 0;
+                const checkBill = ()=>{
+                    $.get('/cart/bill',(res)=>{
+                        
+                    },'json')
+                }
+
                 let addProductsFunction = ()=>{
+                    $("#cartList").html('')
                     subtotal = 0;
                     productCounter = 0;
                     let addProducts = new Promise((resolve, reject)=>{
-                        $.get("/cookies",{'name':'cart'},async function(res){
-                        let cookie = JSON.parse(res);
-                        for(let i=0;i<cookie.length;i++){
-                            let data = cookie[i];
-                            if(data.quantity==0){
-                                continue;
+                        $.get("/cart/list",{},async function(res){
+                            let cookie = JSON.parse(res);
+                            for(let i=0;i<cookie.length;i++){
+                                let data = cookie[i];
+                                if(data.quantity==0){
+                                    continue;
+                                }
+                                let name = (await $.get("/products/get/data",{'id':data.id, 'query':'name'},(res)=>{},'json')).name;
+                                let price = (await $.get("/products/get/data",{'id':data.id, 'query':'price'},(res)=>{},'json')).price;
+                                if(name && price){
+                                    $('#cartList').append('<div class="card border-1 rounded-0 mb-3"><div class="card-header bg-white"><button class="btn-close products me-0 ms-auto d-block py-2"></button></div><div class="card-body"><div class="row"><div class="col-3 d-none d-lg-block"><img class="w-100 img-fluid" src="/img/'+data.id+'/'+data.color+'.jpg"/></div><div class="col-12 col-lg-6"><a href="/products/id/'+data.id+'" class="h5 text-decoration-none fw-bold fontOP text-black mb-1 d-block">'+name.toUpperCase()+'</a><small class="d-block mb-2 fst-italic">'+data.id+'</small><ul style="list-style-type: circle;"><li class="mb-1">Màu: '+data.color.toUpperCase()+'</li><li class="mb-1">Size: '+data.size.toUpperCase()+'</li><li class="mb-1">Giá: '+price.toLocaleString()+' VNĐ</li></ul></div><div class="col-12 col-lg"><p class="mb-2">Số lượng</p><div class="d-flex flex-row mb-3"><input class="form-control me-1 rounded-0 productQuantity" value="'+data.quantity+'" disabled><div class="d-flex flex-column"><button class="changeQuantity increase d-flex h-50 border-0 mb-1" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-up"></i></button><button class="changeQuantity decrease d-flex h-50 border-0" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-down"></i></button></div></div><small class="fw-bold text-center d-block">Tổng: '+(price*data.quantity).toLocaleString()+' VNĐ</small></div></div></div></div>')
+                                }else{
+                                    continue;
+                                }
+                                subtotal+=price*data.quantity;
+                                productCounter+=parseInt(data.quantity);
                             }
-                            let name = (await $.get("/products/get/data",{'id':data.id, 'query':'name'},(res)=>{},'json')).name;
-                            let price = (await $.get("/products/get/data",{'id':data.id, 'query':'price'},(res)=>{},'json')).price;
-                            await $('#cartList').append('<div class="card border-1 rounded-0 mb-3"><div class="card-header bg-white"><button class="btn-close products me-0 ms-auto d-block py-2"></button></div><div class="card-body"><div class="row"><div class="col-3 d-none d-lg-block"><img class="w-100 img-fluid" src="/img/'+data.id+'/'+data.color+'.jpg"/></div><div class="col-12 col-lg-6"><a href="/products/'+data.id+'" class="h5 text-decoration-none fw-bold fontOP text-black mb-1 d-block">'+name.toUpperCase()+'</a><small class="d-block mb-2 fst-italic">'+data.id+'</small><ul style="list-style-type: circle;"><li class="mb-1">Màu: '+data.color.toUpperCase()+'</li><li class="mb-1">Size: '+data.size.toUpperCase()+'</li><li class="mb-1">Giá: '+price.toLocaleString()+' VNĐ</li></ul></div><div class="col-12 col-lg"><p class="mb-2">Số lượng</p><input class="productQuantity mb-3 form-control rounded-0" type="number" id="'+data.id+'" size="'+data.size+'" color="'+data.color+'" value="'+data.quantity+'" min="1" step="1"/><small class="fw-bold text-center d-block">Tổng: '+(price*data.quantity).toLocaleString()+' VNĐ</small></div></div></div></div>')
-                            subtotal+=price*data.quantity;
-                            productCounter+=parseInt(data.quantity);
-                            if(setTimeout(()=>{return true},1000)){
-                                continue;
-                            }
-                        }
-                        resolve()
-                    },'text');
+                            resolve()
+                        },'text');
                     })
                     addProducts.then(()=>{
                         $('#subtotal').text(subtotal.toLocaleString()+" VNĐ")
                         $("#all").text(productCounter)
                         $("#vat").text((subtotal*0.08).toLocaleString()+" VNĐ")
                         $("#total").text((subtotal*1.08+30000).toLocaleString()+" VNĐ")
+                        if(productCounter>0){
+                            $("#confirmButton").prop('disabled', false);
+                        }else{
+                            $("#cartList").parent().html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
+                        }
                         $(".btn-close.products").click(function(){
                             $(this).parent().parent().remove()
+                        })
+                        $(".changeQuantity").click(function(){
+                            let increase = false;
+                            if($(this).hasClass('increase')){
+                                increase = true;
+                            }
+                            let id = $(this).attr("item_id")
+                            let size = $(this).attr("size")
+                            let color = $(this).attr("color")
+                            let quantity = $(this).parent().parent().find("input").val()
+                            if(increase){
+                                quantity++;
+                            }else{
+                                quantity--;
+                            }
+                            let item = {"id":id, "quantity":quantity, "size":size, "color":color}
+                            $.post("/cart/edit",{"item": [item]})
                         })
                     })
                 }
                 addProductsFunction();
-                $("#saveChangeButton").click(()=>{
-                    let newCart = []
-                    $(".productQuantity").each(function(i){
-                        let id = $(this).attr("id")
-                        let size = $(this).attr("size")
-                        let color = $(this).attr("color")
-                        let quantity = $(this).val()
-                        newCart.push({"id":id, "quantity":quantity, "size":size, "color":color})
-                    })
-                    console.log(newCart)
-                    $.post("/cart/edit",{"list":newCart},(res)=>{
-                        if(res.status){
-                            $('#toastTitle').attr("class", "me-auto text-success")
-                            $("#cartList").html("")
-                            addProductsFunction();
-                        }else{
-                            $('#toastTitle').attr("class", "me-auto text-danger")
+                const findTheElement = (object, pattern) => {
+                    try{
+                        if(object.filter(pattern).length > 0){
+                            return true;
+                            }else{
+                                return false;
+                            }
+                    }catch(er){
+                        return false;
+                    }
+                }
+                socket.on("update bill",()=>{
+                    $.get("/cart/list",{},function(res){
+                        let data = JSON.parse(res);
+                        for (let i = 0; i < data.length; i++){
+                            let dt = data[i]
+                            if(dt.quantity==0 && findTheElement($("button.changeQuantity.increase"),"[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]")){
+                                $("button.changeQuantity.increase").filter("[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]").first().parentsUntil('#cartList').remove();
+                            }else if(dt.quantity>0 && findTheElement($("button.changeQuantity.increase"),"[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]")){
+                                $("button.changeQuantity.increase").filter("[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]").first().parent().parent().find('input').val(dt.quantity)
+                            }else{
+                                continue;
+                            }
                         }
-                        $('#toastContent').text(res.msg)
-                        thongbao.show()
-                    },"json")
+                        if(productCounter>0){
+                            $("#confirmButton").prop('disabled', false);
+                        }else{
+                            $("#cartList").parent().html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
+                        }
+                    },'text')
                 })
             })

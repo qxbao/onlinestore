@@ -25,7 +25,7 @@ Thì...vài yêu cầu đơn giản để bạn có thể clone cái project nà
 - Tải các package cần thiết. Làm như này nè
     - Mở cmd/powershell
     - Di chuyển về folder chứa file index.js
-    - Nhập ```npm install --save pug,node-persist,mysql2,express-session,express-mysql-session,express,dotenv,cookie-parser,body-parser,bcrypt``` ấn ENTER ngồi đợi.
+    - Nhập ```npm install --save pug,node-persist,mysql2,express-session,express-mysql-session,express,dotenv,cookie-parser,body-parser,bcrypt,socket.io,request``` ấn ENTER ngồi đợi.
 - Biết chút về Javascript, HTML, CSS (về cơ bản là code web), [Nodejs](https://www.w3schools.com/nodejs/), [Pug](https://pugjs.org/api/getting-started.html) (không thích thì đổi)
 - Follow [cái này](https://www.instagram.com/qnba0) và [cái này](https://www.facebook.com/q2theb)
 

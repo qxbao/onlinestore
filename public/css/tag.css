@@ -1,0 +1,14 @@
+.product:hover > .card-body > img{
+    transition:0.5s all;
+    transform: translate(0,-5px);
+}
+.product:hover > .card-body > .name{
+    color: rgb(47, 107, 186) !important;
+    transition:0.5s all;
+}
+.product:hover{
+    z-index:100;
+    background:#fafafa;
+    transition:0.5s all;
+    transform: scale(1.05)
+}

@@ -62,7 +62,6 @@ html
 
             }
             $(document).ready(async function(){
-                const thongbao = new bootstrap.Toast($('#thongBao'))
                 let colors = [];
                 let size = [];
                 let snc = {};
@@ -116,19 +115,7 @@ html
                 $("#addBtn").click(()=>{
                     let quantity = parseInt($("#quantity").val());
                     let size = $("#size option:selected").attr("size");
-                    let color = $("#chosenColor").attr('value')
-                    $.post("/products/add",{"id":"#{product.id}", "quantity":quantity, "size":size, "color":color},(res)=>{
-                        if(res.status==0){
-                            $('#toastTitle').attr("class", "me-auto text-danger")
-                            $('#toastContent').text(res.msg)
-                        }else if(res.status==1){
-                            $('#toastTitle').attr("class", "me-auto text-success")
-                            $('#toastContent').text(res.msg)
-                        }else{
-                            $('#toastTitle').attr("class", "me-auto text-danger")
-                            $('#toastContent').text("Lỗi không xác định")
-                        }
-                        thongbao.show()
-                    },"json")
+                    let color = $("#chosenColor").attr('value');
+                    $.post("/products/add",{"id":"#{product.id}", "quantity":quantity, "size":size, "color":color})
                 })
             })

@@ -1,101 +1,127 @@
 let express = require('express');
 let router = express.Router()
 let db = require('../modules/dbconnect.js')
+let cv = require('../modules/checkValid.js')
 let fs = require("fs");
-
-const isDataValid = (data, array) => {
-    if (!Array.isArray(array) || !data) {
-        return false;
-    }
-    for (let i = 0; i < array.length; i++) {
-        if (data == array[i]) {
-            return true;
-        }
-    }
-    return false;
-}
+const {
+    io
+} = require('../modules/server.js');
 
 const colorArray = ["black", "white", "tiedye"];
 const sizeArray = ["xs", "s", "m", "l", "xl", "xxl"]
 router.get("/", (req, res) => {
     res.render("cart.pug")
+}).get('/list',(req,res)=>{
+    res.send(req.cookies['cart'])
+}).get('/bill',(req,res)=>{
+    
 })
 
-router.post("/edit",async function (req, res, next) {
-    let data = req.body.list;
+router.post("/edit", async function (req, res, next) {
+    let io = req.app.get('socketio');
+    let data = req.body.item;
+    let curPath = ['/cart'];
+    if(!data) {
+        res.cookie("cart", "[]")
+        io.emit('show toast', {
+            'status': 1,
+            'msg': 'Xóa giỏ hàng thành công!',
+            'url' : curPath
+        })
+        io.emit('navcart quantity')
+        res.sendStatus(200)
+        return 0;
+    }
     if (Array.isArray(data)) {
         for (let i = 0; i < data.length; i++) {
-            if (data[i].id && !isNaN(data[i].quantity) && data[i].quantity > 0 && isDataValid(data[i].color.toLowerCase(), colorArray) && isDataValid(data[i].size.toLowerCase(), sizeArray)) {
-                try{
+            if (data[i].id && !isNaN(data[i].quantity) && data[i].quantity >= 0 && cv.textInArray(data[i].color.toLowerCase(), colorArray) && cv.textInArray(data[i].size.toLowerCase(), sizeArray)) {
+                try {
                     let [found] = await db.promise().query("SELECT * FROM products WHERE id=?", [data[i].id])
-                    if(found[0]){
-                        try{
+                    if (found[0]) {
+                        try {
                             let fileData = await fs.readFileSync('./public/json/products/' + data[i].id + '.json');
                             let remain = JSON.parse(fileData)['data'][data[i].color][data[i].size];
-                            if(remain < data[i].quantity){
-                                res.send({
+                            if (remain < data[i].quantity) {
+                                io.emit('show toast', {
                                     'status': 0,
-                                    'msg': 'Số lượng sản phẩm ' + data[i].id + '-' + data[i].color + '-' + data[i].size + ' quá lớn.'
+                                    'msg': 'Số lượng sản phẩm ' + data[i].id + '-' + data[i].color + '-' + data[i].size + ' quá lớn.',
+                                    'url' : curPath
                                 })
                                 return 0;
-                            }else{
+                            } else {
                                 continue;
                             }
-                        }catch(err){
+                        } catch (err) {
                             console.log(err);
-                            res.send({
+                            io.emit('show toast', {
                                 'status': 0,
-                                'msg': 'Sản phẩm không tồn tại'
+                                'msg': 'Sản phẩm '+data[i].id+' không tồn tại/chưa được cập nhật',
+                                'url' : curPath
                             })
                             return 0;
                         }
-                    }else{  
-                        res.send({
+                    } else {
+                        io.emit('show toast', {
                             'status': 0,
-                            'msg': 'Thông tin sai'
+                            'msg': 'Sản phẩm '+data[i].id+' không tồn tại/chưa được cập nhật',
+                            'url' : curPath
                         })
                         return 0;
                     }
-                }catch(err){
+                } catch (err) {
                     console.log(err);
-                    res.send({
+                    io.emit('show toast', {
                         'status': 0,
-                        'msg': 'Lỗi database'
+                        'msg': 'Lỗi cơ sở dữ liệu',
+                        'url' : curPath
                     })
                     return 0;
                 }
             } else {
-                res.send({
+                io.emit('show toast', {
                     'status': 0,
-                    'msg': 'Thông tin sai định dạng'
+                    'msg': 'Thông tin sai định dạng',
+                    'url' : curPath
                 })
                 return 0;
             }
         }
         next();
     } else {
-        res.send({
+        io.emit('show toast', {
             'status': 0,
-            'msg': 'Thông tin sai định dạng'
+            'msg': 'Thông tin sai định dạng',
+            'url' : curPath
         })
     }
 }, (req, res) => {
-    let data = req.body.list;
+    let curPath = ['/cart'];
+    let data = req.body.item;
+    let cart = req.cookies.cart;
+    if(!cart){
+        "[]"
+    }
+    cart = JSON.parse(cart);
     for (let i = 0; i < data.length; i++) {
         data[i].quantity = parseInt(data[i].quantity);
     }
-    if (JSON.stringify(data) == req.cookies.cart) {
-        res.send({
-            'status': 0,
-            'msg': 'Ấn cho vui à???'
-        })
-        return 0;
+
+    for (let i = 0; i < data.length; i++) {
+        for (let j = 0; j < cart.length; j++) {
+            if(data[i].id == cart[j].id && data[i].size == cart[j].size && data[i].color == cart[j].color){
+                cart[j].quantity = data[i].quantity;
+                break;
+            }
+            if(j == cart.length-1){
+                cart.push(data[i])
+            }
+        }
     }
-    res.cookie("cart", JSON.stringify(data));
-    res.send({
-        'status': 1,
-        'msg': 'Thay đổi đã được lưu!'
-    })
+    
+    res.cookie("cart", JSON.stringify(cart));
+    io.emit('navcart quantity')
+    io.emit('update bill')
+    res.sendStatus(200)
 })
 
 module.exports = router;

@@ -14,3 +14,9 @@
     outline: 5px solid #a1c4fd;
 }
 
+.desc:hover > div{
+    transform: scale(1.02);
+    box-shadow: 0 0 10px black;
+    transition: 0.4s all;
+    z-index: 100;
+}

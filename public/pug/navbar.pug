@@ -12,16 +12,16 @@
                             i.fa-solid.fa-house.me-1
                             | Trang chủ
                     li.nav-item
-                        a.nav-link(href="/clothes")
+                        a.nav-link(href="/#danhmuc")
                             .fa-solid.fa-shirt.me-1
                             | Quần áo
                     li.nav-item
-                        a.nav-link(href="/accessories")
+                        a.nav-link(href="/tag/accs")
                             i.fa-solid.fa-socks.me-1
                             | Phụ kiện
                     li.nav-item.mt-3.mt-lg-0.ms-lg-3
                         a.btn.btn-dark.rounded-0.position-relative.w-100(href="/cart")
-                            span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger#cartCount
+                            span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger#cartCount 0
                             i.fa-solid.fa-cart-shopping.me-1
                             |  Giỏ hàng
                 .w-100.d-lg-none
@@ -44,12 +44,13 @@
                             i.fa-solid.fa-magnifying-glass
 script.
     $(document).ready(()=>{
-        $.get('/cookies',{'name':'cart'},(res)=>{
-            let cookie = JSON.parse(res);
-            let counter = 0;
-            for(let i=0;i<cookie.length;i++){
-                counter+=parseInt(cookie[i].quantity)
-            }
-            $("#cartCount").text(counter)
+        const navcartQuantity = ()=>{
+            $.get('/products/count',{},(res)=>{
+            $("#cartCount").text(res)
         },'text')
+        }
+        navcartQuantity();
+        socket.on('navcart quantity', (data)=>{
+            navcartQuantity()
+        })
     })

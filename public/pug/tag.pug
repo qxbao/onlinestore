@@ -1,0 +1,53 @@
+doctype HTML5
+html
+    head
+        - var name = ""; 
+        case tag
+            when 'tshirt'
+                - name = "áo phông"
+            when 'shirt'
+                - name = "sơ mi"
+            when 'jeans'
+                - name = "quần jeans"
+            when 'short'
+                - name = "quần short"
+            when 'jogger'
+                - name = "quần jogger"
+            when 'accs'
+                - name = "phụ kiện"
+        title="Danh sách "+name
+        meta(charset="UTF-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1.0")
+        include general.pug
+        link(rel="stylesheet" href="/css/tag.css")
+    body
+        include navbar.pug
+        .container.pb-5
+            h1=name.toUpperCase()
+            p Toàn bộ sản phẩm may bằng vải chất lượng cao, màu in & họa tiết được đảm bảo không phai trong 2 năm đầu (Nói chứ phai cũng không đền đâu)  
+            hr
+            .row#productList
+                h2.mb-0 Toàn bộ
+                p.mb-4.text-end Thứ tự hiển thị: 
+                    select.text-center.py-1
+                        option(default) Toàn bộ
+                        option Giá thấp đến cao
+                        option Giá cao đến thấp
+        .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
+            .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
+                .toast-header
+                    strong.me-auto#toastTitle Thông báo
+                    small ngay bây giờ
+                    button(type="button" data-bs-dismiss="toast" aria-label="Close").btn-close
+                .toast-body.text-black#toastContent Nội dung mặc định
+        script.
+            $(document).ready(()=>{
+                $.get("/products/get/listByTag",{"tag":"#{tag}"},(res)=>{
+                    let data = res.data;
+                    if(data){
+                        for(let i=0;i<data.length;i++){
+                            $("#productList").append('<a href="/products/id/'+data[i].id+'" class="product text-decoration-none col-6 col-sm-4 col-xl-2 card rounded-0 border-1 mb-3"><div class="card-body py-4"><img class="img-fluid mb-3" src="/img/'+data[i].id+'/default.jpg"><p class="name fw-bold text-black fontOP">'+data[i].name+'</p><hr><div class="badge w-100 bg-black rounded-0">'+data[i].price.toLocaleString()+' VNĐ</div></div></a>')
+                        }
+                    }
+                },'json')
+            })

@@ -1,6 +1,5 @@
 require('dotenv').config()
-let express = require('express');
-let app = express();
+let {app,html,express} = require('./modules/server.js')
 let bodyParser = require('body-parser')
 let session = require('express-session')
 let MySQLStore = require('express-mysql-session')(session);
@@ -24,16 +23,15 @@ app.use(session({
 }));
 
 
-app.use(cookieParser())
+app.use(cookieParser(process.env.RANDOMKEY_COOKIE))
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
-app.set('views', './public/pug')
-app.set('view engine', 'pug')
 app.use(express.static(__dirname + '/public'));
 
 routerHandle(app)
 
 const port = 80;
-app.listen(port, (req, res) => {
-    console.log("Server đang chạy trên cổng", port)
+html.listen(port, (token) => {
+    console.log("Server đang chạy trên port:",port);
 });
