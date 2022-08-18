@@ -48,21 +48,27 @@ html
                 .toast-body.text-black#toastContent Nội dung mặc định
         script.
             $(document).ready(()=>{
-                let subtotal = 0;
-                let productCounter = 0;
                 const checkBill = ()=>{
                     $.get('/cart/bill',(res)=>{
-                        
+                        res.total = parseInt(res.total)
+                        $('#subtotal').text((res.total).toLocaleString()+" VNĐ")
+                        $("#all").text(res.q)
+                        $("#vat").text((res.total*0.08).toLocaleString()+" VNĐ")
+                        $("#total").text((res.total*1.08+30000).toLocaleString()+" VNĐ")
+                        if(res.q>0){
+                            $("#confirmButton").prop('disabled', false);
+                        }else{
+                            $("#cartList").html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
+                            $("#confirmButton").prop('disabled', true);
+                        }
                     },'json')
                 }
-
                 let addProductsFunction = ()=>{
                     $("#cartList").html('')
-                    subtotal = 0;
-                    productCounter = 0;
                     let addProducts = new Promise((resolve, reject)=>{
                         $.get("/cart/list",{},async function(res){
                             let cookie = JSON.parse(res);
+                            console.log(cookie)
                             for(let i=0;i<cookie.length;i++){
                                 let data = cookie[i];
                                 if(data.quantity==0){
@@ -71,28 +77,21 @@ html
                                 let name = (await $.get("/products/get/data",{'id':data.id, 'query':'name'},(res)=>{},'json')).name;
                                 let price = (await $.get("/products/get/data",{'id':data.id, 'query':'price'},(res)=>{},'json')).price;
                                 if(name && price){
-                                    $('#cartList').append('<div class="card border-1 rounded-0 mb-3"><div class="card-header bg-white"><button class="btn-close products me-0 ms-auto d-block py-2"></button></div><div class="card-body"><div class="row"><div class="col-3 d-none d-lg-block"><img class="w-100 img-fluid" src="/img/'+data.id+'/'+data.color+'.jpg"/></div><div class="col-12 col-lg-6"><a href="/products/id/'+data.id+'" class="h5 text-decoration-none fw-bold fontOP text-black mb-1 d-block">'+name.toUpperCase()+'</a><small class="d-block mb-2 fst-italic">'+data.id+'</small><ul style="list-style-type: circle;"><li class="mb-1">Màu: '+data.color.toUpperCase()+'</li><li class="mb-1">Size: '+data.size.toUpperCase()+'</li><li class="mb-1">Giá: '+price.toLocaleString()+' VNĐ</li></ul></div><div class="col-12 col-lg"><p class="mb-2">Số lượng</p><div class="d-flex flex-row mb-3"><input class="form-control me-1 rounded-0 productQuantity" value="'+data.quantity+'" disabled><div class="d-flex flex-column"><button class="changeQuantity increase d-flex h-50 border-0 mb-1" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-up"></i></button><button class="changeQuantity decrease d-flex h-50 border-0" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-down"></i></button></div></div><small class="fw-bold text-center d-block">Tổng: '+(price*data.quantity).toLocaleString()+' VNĐ</small></div></div></div></div>')
+                                    console.log('haha')
+                                    $('#cartList').append('<div class="card border-1 rounded-0 mb-3"><div class="card-header bg-white"><button class="btn-close products me-0 ms-auto d-block py-2"></button></div><div class="card-body"><div class="row"><div class="col-3 d-none d-lg-block"><img class="w-100 img-fluid" src="/img/'+data.id+'/'+data.color+'.jpg"/></div><div class="col-12 col-lg-6"><a href="/products/id/'+data.id+'" class="h5 text-decoration-none fw-bold fontOP text-black mb-1 d-block">'+name.toUpperCase()+'</a><small class="d-block mb-2 fst-italic">'+data.id+'</small><ul style="list-style-type: circle;"><li class="mb-1">Màu: '+data.color.toUpperCase()+'</li><li class="mb-1">Size: '+data.size.toUpperCase()+'</li><li class="mb-1">Giá: '+price.toLocaleString()+' VNĐ</li></ul></div><div class="col-12 col-lg"><div class="d-flex flex-row mb-3"><input class="text-center form-control me-1 rounded-0 productQuantity" value="'+data.quantity+'" disabled><div class="d-flex flex-column"><button class="changeQuantity increase d-flex h-50 border-0 mb-1" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-up"></i></button><button class="changeQuantity decrease d-flex h-50 border-0" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-down"></i></button></div></div><small class="fw-bold text-center d-block">Tổng: <span class="subtotal">'+(price*data.quantity).toLocaleString()+'</span> VNĐ</small></div></div></div></div>')
                                 }else{
                                     continue;
                                 }
-                                subtotal+=price*data.quantity;
-                                productCounter+=parseInt(data.quantity);
                             }
                             resolve()
                         },'text');
                     })
                     addProducts.then(()=>{
-                        $('#subtotal').text(subtotal.toLocaleString()+" VNĐ")
-                        $("#all").text(productCounter)
-                        $("#vat").text((subtotal*0.08).toLocaleString()+" VNĐ")
-                        $("#total").text((subtotal*1.08+30000).toLocaleString()+" VNĐ")
-                        if(productCounter>0){
-                            $("#confirmButton").prop('disabled', false);
-                        }else{
-                            $("#cartList").parent().html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
-                        }
+                        checkBill()
                         $(".btn-close.products").click(function(){
-                            $(this).parent().parent().remove()
+                            let target = $(this).parent().parent().children('.card-body').find('button').first();
+                            let item = {"id":target.attr('item_id'), "quantity":0, "size":target.attr('size'), "color":target.attr('color')}
+                            $.post("/cart/edit",{"item": [item]})
                         })
                         $(".changeQuantity").click(function(){
                             let increase = false;
@@ -126,23 +125,23 @@ html
                     }
                 }
                 socket.on("update bill",()=>{
-                    $.get("/cart/list",{},function(res){
+                    $.get("/cart/list",{},async function(res){
                         let data = JSON.parse(res);
                         for (let i = 0; i < data.length; i++){
-                            let dt = data[i]
+                            let price = (await $.get("/products/get/data",{'id':data[i].id, 'query':'price'},(res)=>{},'json')).price;
+                            let dt = data[i];
                             if(dt.quantity==0 && findTheElement($("button.changeQuantity.increase"),"[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]")){
                                 $("button.changeQuantity.increase").filter("[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]").first().parentsUntil('#cartList').remove();
                             }else if(dt.quantity>0 && findTheElement($("button.changeQuantity.increase"),"[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]")){
                                 $("button.changeQuantity.increase").filter("[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]").first().parent().parent().find('input').val(dt.quantity)
+                                $("button.changeQuantity.increase").filter("[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]").first().parent().parent().parent().find('.subtotal').text((price*dt.quantity).toLocaleString())
+                            }else if(dt.quantity>0 && !findTheElement($("button.changeQuantity.increase"),"[size="+dt.size+"][color="+dt.color+"][item_id="+dt.id+"]")){
+                                addProductsFunction();
                             }else{
                                 continue;
                             }
                         }
-                        if(productCounter>0){
-                            $("#confirmButton").prop('disabled', false);
-                        }else{
-                            $("#cartList").parent().html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
-                        }
                     },'text')
+                    checkBill()
                 })
             })

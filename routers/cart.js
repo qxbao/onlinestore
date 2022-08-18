@@ -3,18 +3,39 @@ let router = express.Router()
 let db = require('../modules/dbconnect.js')
 let cv = require('../modules/checkValid.js')
 let fs = require("fs");
-const {
-    io
-} = require('../modules/server.js');
+let request = require('request')
 
 const colorArray = ["black", "white", "tiedye"];
 const sizeArray = ["xs", "s", "m", "l", "xl", "xxl"]
+
 router.get("/", (req, res) => {
     res.render("cart.pug")
 }).get('/list',(req,res)=>{
     res.send(req.cookies['cart'])
-}).get('/bill',(req,res)=>{
-    
+}).get('/bill',async function(req, res){
+    let cart = req.cookies.cart;
+    let total = 0;
+    let itemQuantity = 0;
+    try{
+        cart=JSON.parse(cart);
+    }catch(err){
+        console.log(err);
+        cart = []
+    }finally{
+        for (let i = 0; i < cart.length; i++) {
+            let id = cart[i].id;
+            let [data] = await db.promise().query("SELECT * FROM products WHERE id = ?",[id])
+            if(data[0]){
+                total += data[0].price * cart[i].quantity;
+                itemQuantity += cart[i].quantity;
+            }else{
+                res.cookie('cart','[]')
+                res.send({'total':0,'q':0})
+                return 0;
+            }
+        }
+        res.send({'total':total,'q':itemQuantity})
+    }
 })
 
 router.post("/edit", async function (req, res, next) {
@@ -95,6 +116,7 @@ router.post("/edit", async function (req, res, next) {
         })
     }
 }, (req, res) => {
+    let io = req.app.get('socketio');
     let curPath = ['/cart'];
     let data = req.body.item;
     let cart = req.cookies.cart;
