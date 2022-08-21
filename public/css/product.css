@@ -23,3 +23,11 @@
     box-shadow: 0 4px white,
                 0 10px #171717;
 }
+
+#commentCard{
+    background:#f2f2f2;
+}
+
+.comment{
+    box-shadow: 0 0 5px rgb(121, 121, 121);
+}

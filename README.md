@@ -54,3 +54,8 @@ Quá trình một đơn hàng được tạo ra gồm
 3. Đợi chủ store/nhân viên xác nhận đơn hàng và gửi ship
 
 Mỗi đơn hàng đều sở hữu một **mã đơn hàng** riêng và được gửi về email trong trường hợp bạn muốn tra cứu tình trạng đơn hàng của mình.
+
+### Hiển thị sản phẩm
+- **Bình luận**
+
+    Tại mỗi một sản phẩm sẽ có mục bình luận, có thể like hoặc report bình luận. Mỗi IP chỉ có thể bình luận một lần tại mỗi sản phẩm, cũng như chỉ có thể like 1 bình luận 1 lần. Thật ra thì...cái tính năng ngu học này không hợp lắm với một cái store =))) Nhưng mà thôi cứ thêm vào cho vui

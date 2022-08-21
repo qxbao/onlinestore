@@ -35,8 +35,30 @@ html
                         b Lưu ý:
                         |  Kiểm tra kỹ size trước khi đặt hàng. Store từ chối đổi/trả với lí do "mặc không vừa".
             hr.my-4
-            p.h3 Giới thiệu sản phẩm
-            #productDesc #{product.desc}
+            .mb-5
+                p.h3 Giới thiệu sản phẩm
+                #desc
+            .mb-4
+                .row
+                    .col-12.col-lg-8
+                        .card.border-0.rounded-0#commentCard
+                            .card-body.px-3.py-4.px-md-5
+                                p
+                                    span.h3.me-2 Bình luận
+                                    small.fst-italic thử nghiệm
+                                form.mb-4#commentForm
+                                    .row
+                                        .col-12
+                                            input.form-control.mb-2.rounded-0#commentContent(placeholder="Nhập bình luận (giới hạn 500 chữ)" type="text")
+                                        .col-6.m-auto.me-0
+                                            .input-group
+                                                input.form-control.rounded-0#commentName(placeholder="Tên*")
+                                                button.btn.btn-dark Gửi
+                                        small.d-block.fst-italic.mt-3 Lưu ý: Bình luận tiêu cực, tục tĩu sẽ bị xóa và chặn IP.
+                                #commentSection
+                                    p 
+                                        span#commentQuantity 0
+                                        |  bình luận
         .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
             .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
                 .toast-header
@@ -61,28 +83,47 @@ html
             const changeImage = ()=>{
 
             }
+            const loadComment = ()=>{
+                $.get("/products/comments", {'id':'#{product.id}'},(res)=>{
+                for(let i =0;i<res.length;i++){
+                    let subClass = "disabled";
+                    if(res[i].available){
+                        subClass = ""
+                    }
+                    $("#commentSection").append('<div id="'+res[i].comment_id+'" class="card mb-3 comment border-0"><div class="card-body"><div class="row"><div class="col-4 col-md-3"><img class="img-fluid mb-2 rounded-2 w-100" src="https://png.pngtree.com/png-vector/20190215/ourlarge/pngtree-vector-person-icon-png-image_516277.jpg"><button class="bg-transparent border-0 text-danger text-decoration w-100 py-1 reportButton" id="'+res[i].comment_id+'">Báo xấu</button></div><div class="d-flex flex-column col-8 col-md-9"><h5 class="mb-0">'+res[i].name+'</h5><small class="text-secondary mb-2 d-block">'+(new Date(res[i].time)).toLocaleDateString('vi-VI')+'</small><p>'+res[i].content+'</p><div class="mt-auto ms-auto"><button class="btn btn-outline-primary py-1 me-2 likeButton" '+subClass+' id="'+res[i].comment_id+'">Thích</button><small><span class="like" id="'+res[i].comment_id+'">'+res[i].like+'</span> lượt thích</small></div></div></div></div></div>')
+                    $(".likeButton").click(function(){
+                        let id = $(this).attr("id");
+                        $.post("/products/likeComment",{'id':id},(res)=>{
+                            $(this).prop('disabled', true);
+                            $(this).parent().find('span').text(res);
+                        },'text')
+                    })
+                }
+                $("#commentQuantity").text(res.length)
+                },'json')
+            }
             $(document).ready(async function(){
                 let colors = [];
                 let size = [];
-                let snc = {};
                 let totalRemain = 0;
-                    snc = JSON.parse("#{JSON.stringify(product.quantity)}".replace(/&quot;/g,'"'))
-                    for(let i = 0;i<Object.keys(snc).length;i++){
-                        colors.push(Object.keys(snc)[i])
-                        size.push(snc[colors[i]])
-                        $.each(snc[Object.keys(snc)[i]], (key,val)=>{
-                            totalRemain+=val
-                        })
-                    }
-                    $("#totalRemain").text(totalRemain)
-                    $.each(colors, (key,val)=>{
-                        let addedId="";
-                        if(key==0){
-                            addedId = "chosenColor";
-                            changeSize(size[key])
-                        }
-                        $("#colors").append("<div class='color col-1 me-3 border-2 p-0' id='"+addedId+"' value='"+val+"'><div class='ratio ratio-1x1' style='background-position: center center;background-repeat: no-repeat;background-size: cover;background-image:url(/img/color/"+val+".jpg')></div></div>")
+                let snc = !{JSON.stringify(product.quantity)};
+                for(let i = 0;i<Object.keys(snc).length;i++){
+                    colors.push(Object.keys(snc)[i])
+                    size.push(snc[colors[i]])
+                    $.each(snc[Object.keys(snc)[i]], (key,val)=>{
+                        totalRemain+=val
                     })
+                }
+                $("#desc").html('!{product.desc}')
+                $("#totalRemain").text(totalRemain)
+                $.each(colors, (key,val)=>{
+                    let addedId="";
+                    if(key==0){
+                        addedId = "chosenColor";
+                        changeSize(size[key])
+                    }
+                    $("#colors").append("<div class='color col-1 me-3 border-2 p-0' id='"+addedId+"' value='"+val+"'><div class='ratio ratio-1x1' style='background-position: center center;background-repeat: no-repeat;background-size: cover;background-image:url(/img/color/"+val+".jpg')></div></div>")
+                })
                 $(".color").click(function(){
                     $(".color").attr("id","");
                     $(this).attr("id", "chosenColor")
@@ -115,4 +156,16 @@ html
                     let color = $("#chosenColor").attr('value');
                     $.post("/products/add",{"id":"#{product.id}", "quantity":quantity, "size":size, "color":color})
                 })
+                $("#commentForm").submit(()=>{
+                    let name = $("#commentName").val();
+                    let content = $("#commentContent").val()
+                    if(name && content){
+                        $.post("/products/addComment",{'id':'#{product.id}','name':name, 'content':content},(res)=>{
+                            loadComment();
+                        },'text')
+                    }
+                    return false;
+                })
+                
+                loadComment();
             })

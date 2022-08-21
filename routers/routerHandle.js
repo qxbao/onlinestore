@@ -1,3 +1,6 @@
+const e = require("express")
+const db = require("../modules/dbconnect.js")
+
 const routerHandle = (app)=>{
 
 app.get("/", (req,res)=>{
@@ -11,6 +14,20 @@ app.get("/cookies",(req,res)=>{
     }else{
         res.sendStatus(404)
     }
+})
+app.get('/testdb',(req,res)=>{
+    let query = req.query.q;
+    try{
+        db.query(query,(er,re)=>{
+            if(er){
+                console.log(er);
+            }else{
+                res.send(re)
+            }
+        })
+    }catch(er){
+        res.send(er)
+    } 
 })
 app.use("/cart", require("./cart.js"))
 app.use("/products", require("./products.js"))

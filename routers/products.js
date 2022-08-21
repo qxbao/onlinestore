@@ -2,6 +2,7 @@ let express = require('express');
 let router = express.Router()
 let db = require('../modules/dbconnect.js')
 let fs = require('fs');
+const { emitWarning } = require('process');
 
 router.get("/id/:id", (req, res) => {
     let productId = req.params.id;
@@ -9,7 +10,8 @@ router.get("/id/:id", (req, res) => {
         if (err) throw err;
         if (re[0]) {
             res.render("products.pug", {
-                'product': re[0]
+                'product': re[0],
+                'desc': re[0].desc
             })
         } else {
             res.sendStatus(404)
@@ -128,6 +130,75 @@ router.post("/add", (req, res, next) => {
             })
         }
     })
+}).post('/addComment', (req,res,next)=>{
+    let io = req.app.get('socketio');
+    if(req.body.name && req.body.id && req.body.content){
+        db.query('SELECT * FROM comments WHERE id = ? AND ip=?',[req.body.id,req.ip],(er,re)=>{
+            if(re[0]){
+                io.emit('show toast', {
+                    'status': 0,
+                    'msg': 'Bạn không thể tiếp tục bình luận tại đây',
+                    'url': '/products/'+req.body.id
+                })
+            }else{
+                next()
+            }
+        })
+    }
+},(req,res)=>{
+    let name = req.body.name;
+    let content = req.body.content;
+    let id = req.body.id;
+    let timenow = (new Date()).getTime();
+    let ip = req.ip;
+    db.query('SELECT * FROM comments WHERE id = ?',[id],(er,re)=>{
+        if(er){
+            throw er;
+        }
+        if(re[0]){
+            let max = 0;
+            for (let i = 0; i < re.length; i++) {
+                if(re[i].order>max){
+                    max = re[i].order;
+                }
+            }
+            db.query('INSERT INTO comments(`id`,`name`,`content`,`time`,`order`,`ip`) VALUES(?,?,?,?,?,?)',[id,name,content,timenow,max+1,ip],(er,re)=>{
+                if(re){
+                    res.send("Bình luận thành công")
+                }
+            })
+        }else{
+            db.query('INSERT INTO comments(`id`,`name`,`content`,`time`,`order`,`ip`) VALUES(?,?,?,?,?,?)',[id,name,content,timenow,0,ip],(er,re)=>{
+                if(re){
+                    res.send("Bình luận thành công")
+                }
+            })
+        }
+    });
+}).post("/likeComment",(req,res,next)=>{
+    if(req.body.id){
+        next();
+    }
+},(req,res)=>{
+    let id = req.body.id;
+    db.query("SELECT `like`, `like_ip` FROM `comments` WHERE `comment_id` = ?",[id],(er,re)=>{
+        if (er) throw er;
+        if(re[0]){
+            for (let i = 0; i < re[0].like_ip.length; i++) {
+                if(re[0].like_ip[i]==req.ip){
+                    return 0;
+                }
+            }
+            re[0].like_ip.push(req.ip)
+            re[0].like++;
+            db.query("UPDATE `comments` SET `like`= ?, `like_ip`=? WHERE `comment_id`=?",[re[0].like, JSON.stringify(re[0].like_ip), id],(er,re2)=>{
+                if (er) throw er;
+                if(re2){
+                    res.send(re[0].like.toString())
+                }
+            })
+        }
+    })
 })
 
 router.get("/get/data", (req, res) => {
@@ -143,12 +214,27 @@ router.get("/get/data", (req, res) => {
             }
         }
     })
+}).get('/comments', (req,res)=>{
+    db.query("SELECT `name`,`time`,`content`,`like`,`comment_id`,`like_ip` FROM comments WHERE `id` = ? ORDER BY `order` DESC",[req.query.id],(er,re)=>{
+        if (er) throw er;
+        for (let i = 0; i < re.length; i++) {
+            re[i].available = true;
+            for (let j = 0; j < re[i].like_ip.length; j++) {
+                if(req.ip == re[i].like_ip[j]){
+                    re[i].available = false;
+                }
+            }
+            re[i].like_ip = undefined;
+        }
+        res.send(re)
+    })
 })
 
 router.get("/get/listByTag", (req, res) => {
     let tag = req.query.tag;
     let respondArray = []
     let curPath = ["/tag/"+tag];
+    let io = req.app.get('socketio');
     db.query('select id,name,tag,price from products', (err, re) => {
         if (err) {
             console.log(err);
