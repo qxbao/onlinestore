@@ -36,7 +36,7 @@ html
                         |  Kiểm tra kỹ size trước khi đặt hàng. Store từ chối đổi/trả với lí do "mặc không vừa".
             hr.my-4
             p.h3 Giới thiệu sản phẩm
-            #productDesc
+            #productDesc #{product.desc}
         .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
             .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
                 .toast-header
@@ -66,8 +66,7 @@ html
                 let size = [];
                 let snc = {};
                 let totalRemain = 0;
-                await $.get("/json/products/#{product.id}.json",{},(res)=>{
-                    snc = res["data"];
+                    snc = JSON.parse("#{JSON.stringify(product.quantity)}".replace(/&quot;/g,'"'))
                     for(let i = 0;i<Object.keys(snc).length;i++){
                         colors.push(Object.keys(snc)[i])
                         size.push(snc[colors[i]])
@@ -84,8 +83,6 @@ html
                         }
                         $("#colors").append("<div class='color col-1 me-3 border-2 p-0' id='"+addedId+"' value='"+val+"'><div class='ratio ratio-1x1' style='background-position: center center;background-repeat: no-repeat;background-size: cover;background-image:url(/img/color/"+val+".jpg')></div></div>")
                     })
-                    $("#productDesc").html(res["desc"])
-                },"json")
                 $(".color").click(function(){
                     $(".color").attr("id","");
                     $(this).attr("id", "chosenColor")

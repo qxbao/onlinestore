@@ -8,14 +8,8 @@ router.get("/id/:id", (req, res) => {
     db.query("select * from products where id = ?", [productId], (err, re) => {
         if (err) throw err;
         if (re[0]) {
-            fs.readFile("./public/json/products/" + productId + ".json", (er, info) => {
-                if (er) {
-                    res.sendStatus(404)
-                } else {
-                    res.render("products.pug", {
-                        'product': re[0]
-                    })
-                }
+            res.render("products.pug", {
+                'product': re[0]
             })
         } else {
             res.sendStatus(404)
@@ -57,17 +51,8 @@ router.post("/add", (req, res, next) => {
     let curPath = ["/products/id/"+id];
     db.query("SELECT * FROM products WHERE id = ?", [id], (er, re) => {
         if (er) throw er;
-        if (re[0]) {
-            fs.readFile("./public/json/products/" + id + ".json", (er, info) => {
-                if (er) {
-                    io.emit('show toast', {
-                        'status': 0,
-                        'msg': 'Sản phẩm không tồn tại',
-                        'url': curPath
-                    })
-                    return 0;
-                }
-                let processedData = JSON.parse(info).data;
+        if (re[0] && re[0].quantity){
+                let processedData = re[0].quantity;
                 let remain = processedData[color][size]
                 if (quantity <= remain && 0 < quantity) {
                     // cookie handle
@@ -135,7 +120,6 @@ router.post("/add", (req, res, next) => {
                         'url': curPath
                     })
                 }
-            })
         } else {
             io.emit('show toast', {
                 'status': 0,

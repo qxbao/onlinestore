@@ -9,19 +9,19 @@
                 ul.navbar-nav.mb-2.mb-lg-0.col-lg-8.pe-0
                     li.nav-item
                         a.nav-link(href="/")
-                            i.fa-solid.fa-house.me-1
+                            //- i.fa-solid.fa-house.me-1
                             | Trang chủ
                     li.nav-item
                         a.nav-link(href="/#danhmuc")
-                            .fa-solid.fa-shirt.me-1
+                            //- .fa-solid.fa-shirt.me-1
                             | Quần áo
                     li.nav-item
                         a.nav-link(href="/tag/accs")
-                            i.fa-solid.fa-socks.me-1
+                            //- i.fa-solid.fa-socks.me-1
                             | Phụ kiện
-                    li.nav-item.mt-3.mt-lg-0.ms-lg-3
-                        a.btn.btn-dark.rounded-0.position-relative.w-100(href="/cart")
-                            span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger#cartCount 0
+                    li.nav-item.my-3.my-lg-0.ms-lg-3#cartNavbuttonContainer
+                        a.btn.rounded-0.position-relative.w-100.t#cartNavbutton(href="/cart")
+                            span.position-absolute.top-0.start-100.translate-middle.badge.rounded-pill.bg-danger#cartCount null
                             i.fa-solid.fa-cart-shopping.me-1
                             |  Giỏ hàng
                 .w-100.d-lg-none

@@ -59,9 +59,7 @@ router.post("/edit", async function (req, res, next) {
                 try {
                     let [found] = await db.promise().query("SELECT * FROM products WHERE id=?", [data[i].id])
                     if (found[0]) {
-                        try {
-                            let fileData = await fs.readFileSync('./public/json/products/' + data[i].id + '.json');
-                            let remain = JSON.parse(fileData)['data'][data[i].color][data[i].size];
+                            let remain = found[0].quantity[data[i].color][data[i].size];
                             if (remain < data[i].quantity) {
                                 io.emit('show toast', {
                                     'status': 0,
@@ -72,15 +70,6 @@ router.post("/edit", async function (req, res, next) {
                             } else {
                                 continue;
                             }
-                        } catch (err) {
-                            console.log(err);
-                            io.emit('show toast', {
-                                'status': 0,
-                                'msg': 'Sản phẩm '+data[i].id+' không tồn tại/chưa được cập nhật',
-                                'url' : curPath
-                            })
-                            return 0;
-                        }
                     } else {
                         io.emit('show toast', {
                             'status': 0,
