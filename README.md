@@ -14,15 +14,15 @@ Cái project củ chuối này được đẻ ra sau khi mình lỡ tay drop cá
 
 Về cơ bản thì ở đây ngoài Javascript ra thì chỉ có mỗi Javascript vì back-end được viết bằng Nodejs, front-end cũng là pug/jade nên nếu không quen thì config các thứ lại khó khăn lắmm :dizzy_face: Database thì mình chọn MySQL, nếu muốn chỉnh sang Mongo thì đấy là việc của bạnnn lêu lêu :triumph:  
 
-Bảo mật các thứ thì cũng chỉ ở mức trung bình tệ thôi :yum: Nhiều chỗ có bug mà mình cũng lười patch nữa, cái đấy cứ để sau thôi. Cái này chưa tìm hiểu kỹ lắm, nhiệt tình + ngu dốt = phá hoại thì lại mệch aiza
+Bảo mật các thứ thì cũng chỉ ở mức trung bình tệ thôi :yum: Nhiều chỗ có bug mà mình cũng lười patch nữa, cái đấy cứ để sau thôi. Mảng này mình không rõ lắm, nhiệt tình + ngu dốt = phá hoại thì lại mệch aiza
 
 Project 1 người làm nên sẽ có những hạn chế nhất định. Bạn có thể tự phát triển thêm.
 
 ## Yêu cầu
 Thì...vài yêu cầu đơn giản để bạn có thể clone cái project này về mà vẫn dùng được là:
-- Máy bạn đã cài [Nodejs](https://nodejs.org/en/download/) (Down bản LTS í, mấy ver mới cài linh tinh lỗi lên mạng cũng không có ai giúp đâu)
-- Có cài đặt [MySQL Server](https://dev.mysql.com/downloads/mysql/), vào đó có gì chỉnh mấy cái thông tin đăng nhập thôi là ok.
-- Tải các package cần thiết. Làm như này nè
+- Máy bạn đã cài [Nodejs](https://nodejs.org/en/download/) (của mình là v16.16)
+- Có cài đặt [MySQL Server](https://dev.mysql.com/downloads/mysql/), có gì tạo file .env chỉnh mấy cái thông tin đăng nhập thôi là ok.
+- Tải các package cần thiết. Làm như vậy
     - Mở cmd/powershell
     - Di chuyển về folder chứa file index.js
     - Nhập ```npm install --save pug,node-persist,mysql2,express-session,express-mysql-session,express,dotenv,cookie-parser,body-parser,bcrypt,socket.io,request``` ấn ENTER ngồi đợi.
