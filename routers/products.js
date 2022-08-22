@@ -235,7 +235,18 @@ router.get("/get/listByTag", (req, res) => {
     let respondArray = []
     let curPath = ["/tag/"+tag];
     let io = req.app.get('socketio');
-    db.query('select id,name,tag,price from products', (err, re) => {
+    let order;
+    switch(parseInt(req.query.order)){
+        case 1:
+            order = "ORDER BY price ASC";
+            break;
+        case 2:
+            order = "ORDER BY price DESC";
+            break;
+        default:
+            order = "";
+    }
+    db.query('SELECT id,name,tag,price FROM products '+order, (err, re) => {
         if (err) {
             console.log(err);
             io.emit('show toast', {

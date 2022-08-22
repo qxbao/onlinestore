@@ -8,6 +8,32 @@ let request = require('request')
 const colorArray = ["black", "white", "tiedye"];
 const sizeArray = ["xs", "s", "m", "l", "xl", "xxl"]
 
+const couponHandler = (code,total,vat,ship,quantity, resolve,reject)=>{
+    if(!code){
+        return {'code':code, 'total':total, 'vat':vat, 'ship':ship, 'q':quantity, 'status':0}
+    }
+    if(!isNaN(Number(total)) && !isNaN(Number(vat)) && !isNaN(Number(ship) && !isNaN(Number(quantity)))){
+        db.query("SELECT * FROM coupons WHERE code=?",[code],(er,re)=>{
+            if(re[0]){
+                let cp = re[0];
+                if(cp.min <= total && total <= cp.max){
+                    total = total - total*(cp.total)/100;
+                    ship = ship - ship*(cp.ship)/100;
+                    vat = vat - vat*(cp.vat)/100;
+                    console.log(ship);
+                    resolve({'code':code, 'total':total, 'vat':vat, 'ship':ship, 'q':quantity})
+                }else{
+                    reject({'code':code, 'total':total, 'vat':vat, 'ship':ship, 'q':quantity})
+                }
+            }else{
+                reject({'code':code, 'total':total, 'vat':vat, 'ship':ship, 'q':quantity})
+            }
+        })
+    }else{
+        reject({'code':code, 'total':total, 'vat':vat, 'ship':ship, 'q':quantity})
+    }
+}
+
 router.get("/", (req, res) => {
     res.render("cart.pug")
 }).get('/list',(req,res)=>{
@@ -16,10 +42,11 @@ router.get("/", (req, res) => {
     let cart = req.cookies.cart;
     let total = 0;
     let itemQuantity = 0;
+    let code = req.body.code;
     try{
         cart=JSON.parse(cart);
     }catch(err){
-        console.log(err);
+        res.cookie('cart','[]')
         cart = []
     }finally{
         for (let i = 0; i < cart.length; i++) {
@@ -28,14 +55,65 @@ router.get("/", (req, res) => {
             if(data[0]){
                 total += data[0].price * cart[i].quantity;
                 itemQuantity += cart[i].quantity;
-            }else{
-                res.cookie('cart','[]')
-                res.send({'total':0,'q':0})
-                return 0;
             }
         }
-        res.send({'total':total,'q':itemQuantity})
+        res.send({'total':total,'q':itemQuantity, 'vat':total*0.08, 'ship':30000})
     }
+}).get("/afterCoupon",(req,res)=>{
+    let data = req.query.data;
+    let apc = req.cookies.applied_coupon;
+    if(apc){
+        var promise = new Promise((resolve,reject)=>{
+            data = couponHandler(apc,data.total,data.vat,data.ship,data.q,resolve,reject);
+        })
+        promise.then((result)=>{
+            res.send(result)
+        },(result)=>{
+            res.cookie("applied_coupon", "")
+            res.send(result)
+        })
+    }else{
+        res.send(data)
+    }
+}).post("/applyCoupon",(req,res)=>{
+    let code = req.body.code;
+    if(code){
+        db.query("SELECT * FROM coupons WHERE code=?",[code],async function(er,re){
+            let cp = re[0];
+            let total = 0;
+            if(cp){
+                try{
+                    let cart = JSON.parse(req.cookies.cart);
+                    for (let i = 0; i < cart.length; i++) {
+                        let id = cart[i].id;
+                        let [data] = await db.promise().query("SELECT * FROM products WHERE id = ?",[id]);
+                        if(cart[i].quantity==0){
+                            continue;
+                        }
+                        if(data[0]){
+                            total += data[0].price * cart[i].quantity;
+                        }
+                    }
+                }catch(er){
+                    total = 0;
+                }finally{
+                    if(cp.min <= total && total <= cp.max){
+                        res.cookie("applied_coupon",code)
+                        res.send({'status':1, 'msg': "Áp dụng thành công!"})
+                    }else{
+                        res.send({'status':0, 'msg': "Không đủ điều kiện áp dụng"})
+                    }
+                }
+            }else{
+                res.send({'status':0, 'msg': "Mã giảm giá không tồn tại"})
+            }
+        })
+    }else{
+        res.send({'status':0, 'msg': "Vui lòng nhập mã"})
+    }
+}).post("/removeCoupon",(req,res)=>{
+    res.cookie("applied_coupon","")
+    res.sendStatus(200)
 })
 
 router.post("/edit", async function (req, res, next) {

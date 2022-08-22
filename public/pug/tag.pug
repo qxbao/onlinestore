@@ -26,13 +26,14 @@ html
             h1=name.toUpperCase()
             p Toàn bộ sản phẩm may bằng vải chất lượng cao, màu in & họa tiết được đảm bảo không phai trong 2 năm đầu (Nói chứ phai cũng không đền đâu)  
             hr
+
+            h2.mb-0 Toàn bộ
+            p.mb-4.text-end Thứ tự hiển thị: 
+                select.text-center.py-1.px-2#orderSelect
+                    option(default value="0") Toàn bộ
+                    option(value="1") Giá thấp đến cao
+                    option(value="2") Giá cao đến thấp
             .row#productList
-                h2.mb-0 Toàn bộ
-                p.mb-4.text-end Thứ tự hiển thị: 
-                    select.text-center.py-1
-                        option(default) Toàn bộ
-                        option Giá thấp đến cao
-                        option Giá cao đến thấp
         .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
             .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
                 .toast-header
@@ -42,7 +43,9 @@ html
                 .toast-body.text-black#toastContent Nội dung mặc định
         script.
             $(document).ready(()=>{
-                $.get("/products/get/listByTag",{"tag":"#{tag}"},(res)=>{
+                const listProduct = (order=undefined)=>{
+                    $("#productList").html("")
+                    $.get("/products/get/listByTag",{"tag":"#{tag}",'order':order},(res)=>{
                     let data = res.data;
                     if(data){
                         for(let i=0;i<data.length;i++){
@@ -50,4 +53,9 @@ html
                         }
                     }
                 },'json')
+                }
+                listProduct()
+                $("#orderSelect").change(function(){
+                    listProduct($(this).val())
+                })
             })

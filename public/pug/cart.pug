@@ -19,25 +19,32 @@ html
                         .card-body.fontNunito.p-4(style="background:#f4f4f4")
                             h2.fontRaleway.text-center Thông tin đơn hàng
                             hr.bg-dark.mb-4
-                            .d-flex
+                            .d-flex.mb-2
                                 p Số lượng sản phẩm
                                 b.ms-auto#all 0
-                            .d-flex
+                            .d-flex.mb-2
                                 p Giá trị đơn hàng
                                 b.ms-auto#subtotal 0 VNĐ
-                            .d-flex
+                            .d-flex.mb-2
                                 p Thuế VAT
                                 b.ms-auto#vat 0 VNĐ 
-                            .d-flex
+                            .d-flex.mb-2
                                 p Phí ship (toàn quốc)
-                                b.ms-auto 30,000 VNĐ
+                                b.ms-auto#ship 0 VNĐ
                             hr
                             .d-flex
                                 b TỔNG CỘNG
                                 b.ms-auto#total 0 VNĐ
                             hr
                             small
-                                i Thuế VAT được tính bằng 8% tổng giá trị đơn hàng. Mọi ý kiến về thuế vui lòng liên hệ cơ quan có thẩm quyền.
+                                i.d-block.mb-1 * Thuế VAT được tính bằng 8% tổng giá trị đơn hàng. Mọi ý kiến về thuế vui lòng liên hệ cơ quan có thẩm quyền.
+                                i.d-block * Mỗi đơn hàng chỉ được áp dụng một mã giảm giá
+                    .mb-4
+                        .input-group.mb-0#couponForm
+                            input.form-control.fst-italic.fontOP.rounded-0#couponCode(placeholder="Nhập mã giảm giá (nếu có)")
+                            button.btn.btn-outline-success.rounded-0#applyCouponButton Áp dụng
+                            button.btn.btn-outline-danger.rounded-0.d-none#removeCouponButton Gỡ
+                        small.d-block.my-1#couponNote
                     button.w-100.btn.btn-outline-dark.py-3.rounded-0#confirmButton(disabled) XÁC NHẬN ĐƠN
         .toast-container.position-fixed.bottom-0.end-0.p-3.fontOP
             .toast#thongBao.rounded-0(role="alert" aria-live="assertive" aria-atomic="true")
@@ -46,44 +53,66 @@ html
                     small ngay bây giờ
                     button(type="button" data-bs-dismiss="toast" aria-label="Close").btn-close
                 .toast-body.text-black#toastContent Nội dung mặc định
+        .modal.fade#confirmModal(tabindex="-1")
+            .modal-dialog
+                .modal-content.rounded-1
+                    .modal-header
+                        h5.modal-title THÔNG TIN THANH TOÁN
+                        button.btn-close(data-bs-dismiss="modal")
+                    .modal-body
+                    .modal-footer
+                        button.btn.btn-outline-primary.rounded-0 TẠO ĐƠN HÀNG
         script.
             $(document).ready(()=>{
                 const checkBill = ()=>{
-                    $.get('/cart/bill',(res)=>{
-                        res.total = parseInt(res.total)
-                        $('#subtotal').text((res.total).toLocaleString()+" VNĐ")
-                        $("#all").text(res.q)
-                        $("#vat").text((res.total*0.08).toLocaleString()+" VNĐ")
-                        $("#total").text((res.total*1.08+30000).toLocaleString()+" VNĐ")
-                        if(res.q>0){
-                            $("#confirmButton").prop('disabled', false);
-                        }else{
-                            $("#cartList").html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
-                            $("#confirmButton").prop('disabled', true);
-                        }
+                    $.get('/cart/bill',(re)=>{
+                        $.get("/cart/afterCoupon", {'data':re}, (res)=>{
+                            if(res.code){
+                                $("#couponCode").val(res.code.toUpperCase())
+                                $("#couponCode").prop('disabled',true)
+                                $("#applyCouponButton").addClass('d-none')
+                                $("#removeCouponButton").removeClass('d-none')
+                            }
+                            res.total = parseInt(res.total);
+                            res.vat = parseInt(res.vat);
+                            res.ship = parseInt(res.ship);
+                            $('#subtotal').text(res.total.toLocaleString("vi-VI")+" VNĐ")
+                            $("#all").text(res.q)
+                            $("#ship").text(res.ship.toLocaleString("vi-VI")+" VNĐ")
+                            $("#vat").text(res.vat.toLocaleString("vi-VI")+" VNĐ")
+                            $("#total").text(Math.floor(res.total+res.vat+res.ship).toLocaleString("vi-VI")+" VNĐ")
+                            if(res.q>0){
+                                $("#confirmButton").prop('disabled', false);
+                            }else{
+                                $("#cartList").html('<p class="text-center mb-0 fst-italic">Bạn nỡ lòng nào để giỏ hàng trống rỗng như vậy sao T^T</p>')
+                                $("#confirmButton").prop('disabled', true);
+                            }
+                        },'json')
                     },'json')
                 }
                 let addProductsFunction = ()=>{
                     $("#cartList").html('')
                     let addProducts = new Promise((resolve, reject)=>{
                         $.get("/cart/list",{},async function(res){
-                            let cookie = JSON.parse(res);
-                            console.log(cookie)
-                            for(let i=0;i<cookie.length;i++){
-                                let data = cookie[i];
-                                if(data.quantity==0){
-                                    continue;
+                            if(res || res == '[]'){
+                                let cookie = JSON.parse(res);
+                                for(let i=0;i<cookie.length;i++){
+                                    let data = cookie[i];
+                                    if(data.quantity==0){
+                                        continue;
+                                    }
+                                    let name = (await $.get("/products/get/data",{'id':data.id, 'query':'name'},(res)=>{},'json')).name;
+                                    let price = (await $.get("/products/get/data",{'id':data.id, 'query':'price'},(res)=>{},'json')).price;
+                                    if(name && price){
+                                        $('#cartList').append('<div class="card border-1 rounded-0 mb-3"><div class="card-header bg-white"><button class="btn-close products me-0 ms-auto d-block py-2"></button></div><div class="card-body"><div class="row"><div class="col-3 d-none d-lg-block"><img class="w-100 img-fluid" src="/img/'+data.id+'/'+data.color+'.jpg"/></div><div class="col-12 col-lg-6"><a href="/products/id/'+data.id+'" class="h5 text-decoration-none fw-bold fontOP text-black mb-1 d-block text-truncate">'+name.toUpperCase()+'</a><small class="d-block mb-2 fst-italic">'+data.id+'</small><ul style="list-style-type: circle;"><li class="mb-1">Màu: '+data.color.toUpperCase()+'</li><li class="mb-1">Size: '+data.size.toUpperCase()+'</li><li class="mb-1">Giá: '+price.toLocaleString()+' VNĐ</li></ul></div><div class="col-12 col-lg"><div class="d-flex flex-row mb-3"><input class="text-center form-control me-1 rounded-0 productQuantity" value="'+data.quantity+'" disabled><div class="d-flex flex-column"><button class="changeQuantity increase d-flex h-50 border-0 mb-1" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-up"></i></button><button class="changeQuantity decrease d-flex h-50 border-0" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-down"></i></button></div></div><small class="fw-bold text-center d-block">Tổng: <span class="subtotal">'+(price*data.quantity).toLocaleString()+'</span> VNĐ</small></div></div></div></div>')
+                                    }else{
+                                        continue;
+                                    }
                                 }
-                                let name = (await $.get("/products/get/data",{'id':data.id, 'query':'name'},(res)=>{},'json')).name;
-                                let price = (await $.get("/products/get/data",{'id':data.id, 'query':'price'},(res)=>{},'json')).price;
-                                if(name && price){
-                                    console.log('haha')
-                                    $('#cartList').append('<div class="card border-1 rounded-0 mb-3"><div class="card-header bg-white"><button class="btn-close products me-0 ms-auto d-block py-2"></button></div><div class="card-body"><div class="row"><div class="col-3 d-none d-lg-block"><img class="w-100 img-fluid" src="/img/'+data.id+'/'+data.color+'.jpg"/></div><div class="col-12 col-lg-6"><a href="/products/id/'+data.id+'" class="h5 text-decoration-none fw-bold fontOP text-black mb-1 d-block text-truncate">'+name.toUpperCase()+'</a><small class="d-block mb-2 fst-italic">'+data.id+'</small><ul style="list-style-type: circle;"><li class="mb-1">Màu: '+data.color.toUpperCase()+'</li><li class="mb-1">Size: '+data.size.toUpperCase()+'</li><li class="mb-1">Giá: '+price.toLocaleString()+' VNĐ</li></ul></div><div class="col-12 col-lg"><div class="d-flex flex-row mb-3"><input class="text-center form-control me-1 rounded-0 productQuantity" value="'+data.quantity+'" disabled><div class="d-flex flex-column"><button class="changeQuantity increase d-flex h-50 border-0 mb-1" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-up"></i></button><button class="changeQuantity decrease d-flex h-50 border-0" item_id="'+data.id+'" size="'+data.size+'" color="'+data.color+'"><i class="fa-solid fa-chevron-down"></i></button></div></div><small class="fw-bold text-center d-block">Tổng: <span class="subtotal">'+(price*data.quantity).toLocaleString()+'</span> VNĐ</small></div></div></div></div>')
-                                }else{
-                                    continue;
-                                }
+                                resolve()
+                            }else{
+                                resolve()
                             }
-                            resolve()
                         },'text');
                     })
                     addProducts.then(()=>{
@@ -124,6 +153,32 @@ html
                         return false;
                     }
                 }
+                $('#confirmButton').click(()=>{
+                    $('#confirmModal').modal('show');
+                });
+                $("#applyCouponButton").click(()=>{
+                    let code = $("#couponCode").val()
+                    $.post("/cart/applyCoupon",{'code':code},(res)=>{
+                        if(res.status){
+                            $("#couponNote").attr('class','text-success')
+                            checkBill()
+                        }else{
+                            $("#couponNote").attr('class','text-danger')
+                        }
+                        $("#couponNote").text(res.msg)
+                    })
+                })
+                $("#removeCouponButton").click(()=>{
+                    $.post("/cart/removeCoupon",{},(res)=>{
+                        $("#couponNote").text("")
+                        $("#couponCode").val("");
+                        $("#couponCode").prop('disabled',false)
+                        $("#removeCouponButton").addClass('d-none')
+                        $("#applyCouponButton").removeClass('d-none')
+                        checkBill()
+                    })
+                })
+                
                 socket.on("update bill",()=>{
                     $.get("/cart/list",{},async function(res){
                         let data = JSON.parse(res);
