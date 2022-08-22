@@ -61,6 +61,7 @@ Mỗi đơn hàng đều sở hữu một **mã đơn hàng** riêng và đượ
 </p>
 
 - **Bình luận**
+
     Tại mỗi một sản phẩm sẽ có mục bình luận, có thể like hoặc report bình luận. Mỗi IP chỉ có thể bình luận một lần tại mỗi sản phẩm, cũng như chỉ có thể like 1 bình luận 1 lần, nói tục thì ăn auto-ban. Thật ra... tính năng ngu học này không hợp lắm với một cái store =))) Nhưng mà thôi cứ thêm vào cho vui
     <p align="center">
     <image width="50%" src="https://github.com/qxbao/onlinestore/raw/master/public/img/4readme/comment_section.png">
