@@ -37,8 +37,8 @@ html
                                 b.ms-auto#total 0 VNĐ
                             hr
                             small
-                                i.d-block.mb-1 * Thuế VAT được tính bằng 8% tổng giá trị đơn hàng. Mọi ý kiến về thuế vui lòng liên hệ cơ quan có thẩm quyền.
-                                i.d-block * Mỗi đơn hàng chỉ được áp dụng một mã giảm giá
+                                i.d-block.mb-1 * Thuế VAT được tính bằng 8% tổng giá trị đơn hàng.
+                                i.d-block * Mỗi đơn hàng chỉ được áp dụng một mã giảm giá.
                     .mb-4
                         .input-group.mb-0#couponForm
                             input.form-control.fst-italic.fontOP.rounded-0#couponCode(placeholder="Nhập mã giảm giá (nếu có)")
@@ -57,11 +57,31 @@ html
             .modal-dialog
                 .modal-content.rounded-1
                     .modal-header
-                        h5.modal-title THÔNG TIN THANH TOÁN
+                        h5.modal-title THÔNG TIN KHÁCH HÀNG
                         button.btn-close(data-bs-dismiss="modal")
                     .modal-body
+                        .container.fontNunito
+                            .row.mb-3
+                                .col
+                                    p.mb-2 Tên người nhận
+                                        span.text-danger *
+                                    input.form-control#customerName
+                                .col
+                                    p.mb-2 Số điện thoại
+                                        span.text-danger *
+                                    input.form-control#customerPhone
+                            .mb-3
+                                p.mb-2 Email
+                                        span.text-danger *
+                                input.form-control#customerEmail
+                            .mb-3
+                                p.mb-2 Địa chỉ
+                                        span.text-danger *
+                                input.form-control#customerAddress(placeholder="địa chỉ cụ thể")
+                            small.fst-italic.d-block * Tất cả thông tin trên chỉ phục vụ cho quá trình giao/nhận hàng được thuận lợi
+                            small.fst-italic.d-block.text-danger#errMsg
                     .modal-footer
-                        button.btn.btn-outline-primary.rounded-0 TẠO ĐƠN HÀNG
+                        button.btn.btn-outline-primary.rounded-0#createOrderButton TẠO ĐƠN HÀNG
         script.
             $(document).ready(()=>{
                 const checkBill = ()=>{
@@ -73,14 +93,14 @@ html
                                 $("#applyCouponButton").addClass('d-none')
                                 $("#removeCouponButton").removeClass('d-none')
                             }
-                            res.total = parseInt(res.total);
+                                res.subtotal = parseInt(res.subtotal);
                             res.vat = parseInt(res.vat);
                             res.ship = parseInt(res.ship);
-                            $('#subtotal').text(res.total.toLocaleString("vi-VI")+" VNĐ")
+                            $('#subtotal').text(res.subtotal.toLocaleString("vi-VI")+" VNĐ")
                             $("#all").text(res.q)
                             $("#ship").text(res.ship.toLocaleString("vi-VI")+" VNĐ")
                             $("#vat").text(res.vat.toLocaleString("vi-VI")+" VNĐ")
-                            $("#total").text(Math.floor(res.total+res.vat+res.ship).toLocaleString("vi-VI")+" VNĐ")
+                            $("#total").text(Math.floor(res.subtotal+res.vat+res.ship).toLocaleString("vi-VI")+" VNĐ")
                             if(res.q>0){
                                 $("#confirmButton").prop('disabled', false);
                             }else{
@@ -177,6 +197,19 @@ html
                         $("#applyCouponButton").removeClass('d-none')
                         checkBill()
                     })
+                })
+                $("#createOrderButton").click(()=>{
+                    let name = $("#customerName").val();
+                    let phone = $("#customerPhone").val();
+                    let email = $("#customerEmail").val();
+                    let address = $("#customerAddress").val();
+                    $.post("/cart/lastStep",{'name':name, 'phone':phone, 'email':email, 'address':address},(res)=>{
+                        if(res.status){
+                            window.location.href = '/orders?id='+res.order_id;
+                        }else{
+                            $('#errMsg').text(res.msg);
+                        }
+                    },'json')
                 })
                 
                 socket.on("update bill",()=>{

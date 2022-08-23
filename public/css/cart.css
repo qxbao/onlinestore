@@ -1,4 +1,5 @@
 .changeQuantity{
+    transition: 0.3s all;
     background:black;
     color: white;
     opacity: 0.7;

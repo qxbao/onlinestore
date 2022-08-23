@@ -20,3 +20,18 @@
     transition: 0.4s all;
     z-index: 100;
 }
+
+.list{
+    transition:0.5s all;
+    border:none;
+    box-shadow: 0 5px 5px #959595 !important;
+}
+
+.list:hover{
+    transform: translateY(-10px);
+}
+
+.banner{
+    border-radius: 10px;
+    box-shadow:0 5px black
+}

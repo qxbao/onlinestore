@@ -72,4 +72,4 @@ Mỗi đơn hàng đều sở hữu một **mã đơn hàng** riêng và đượ
 <image width="50%" src="https://github.com/qxbao/onlinestore/raw/master/public/img/4readme/coupon.png">
 </p>
 
-Mã giảm giá được áp dụng khi đơn hàng có giá trị nằm trong khoảng hợp lệ. Hiện tại chỉ có thể giảm theo % tổng giá trị đơn hàng, VAT, ship, có thể thêm (maximumDiscount) vào sau.
+Mã giảm giá được áp dụng khi đơn hàng có giá trị nằm trong khoảng hợp lệ. Hiện tại chỉ có thể giảm theo % tổng giá trị đơn hàng, VAT, ship. Có thể thêm *maximumDiscount* vào sau.
